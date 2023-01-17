@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+
+  go:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - "8080:8080"
+    networks:
+      net:
+        ipv4_address: 192.168.0.2
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider go:8080 || exit 1
+      interval: 1s
+      retries: 3
+      start_period: 0s
+      timeout: 1s
+
+  ab:
+    image: jordi/ab:latest
+    command: -n 100 -c 10 http://192.168.0.2:8080/
+    networks:
+      net:
+        ipv4_address: 192.168.0.4
+    depends_on:
+      go:
+        condition: service_healthy
+
+networks:
+  net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.0.0/16
+          gateway: 192.168.0.3
