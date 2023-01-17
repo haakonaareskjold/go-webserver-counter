@@ -20,7 +20,7 @@ func main() {
 			log.Printf("Request counter have reached 100, exiting.")
 			os.Exit(0)
 		}
-		mutex.Unlock()
+		defer mutex.Unlock()
 	})
 	http.ListenAndServe(":8080", nil)
 }
